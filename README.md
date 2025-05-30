@@ -1,7 +1,17 @@
 # tutorial11-deployment-on-kubernetes
 
+## Reflections on 'Hello Minikube'
+
 ### 1. Compare the application logs before and after you exposed it as a Service. Try to open the app several times while the proxy into the Service is running. What do you see in the logs? Does the number of logs increase each time you open the app?
 Kondisi application logs setelah diekspos sebagai service adalah munculnya aktivitas HTTP yang masuk seperti `GET/`. Sebelum aplikasi diekspos, hanya terlihat adanya HTTP dan UDP yang dijalankan pada port 8080 (HTTP) dan port 8081 (UDP) saja. Namun setelah diekspos sebagai service dan diakses, muncul log tambahan yakni `GET/` yang menandakan bahwa aplikasi menerima permintaan HTTP dari client. Jumlah logs akan bertambah setiap aplikasi dibuka atau di-refresh yang menunjukkan bahwa service berhasil mengarahkan permintaan ke pod yang sedang menjalankan aplikasi.
 
 ### 2. Notice that there are two versions of `kubectl get` invocation during this tutorial section. The first does not have any option, while the latter has `-n` option with value set to `kube-system`.What is the purpose of the `-n` option and why did the output not list the pods/services that you explicitly created?
 Berdasarkan [kubernetes-namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/), saat saya menjalankan `kubectl get` dengan menggunakan `-n`, saya mencari resources di dalam sebuah namespace. Contohnya jika saya menjalankan `kubectl get pods -n kube-system`, maka saya akan menampilkan pods-pods yang berada di dalam namespace `kube-system`. Hal inilah yang membuat pods/services yang saya buat tidak muncul di output, yakni karena pods/service yang saya buat terletak di namespace `default` dan bukan di namespace `kube-system`. `kube-system` sendiri adalah namespace untuk menjalankan komponen internal seperti Cluster DNS atau Server Metrics. Oleh karena itu, pods/service yang saya buatyakni `hello-node` tidak ditampilkan pods nya.
+
+## Reflections on 'Rolling Update & Kubernetes Manifest File'
+
+### 1.  What is the difference between Rolling Update and Recreate deployment strategy?
+Strategi Rolling Update melakukan pembaruan secara bertahap dengan cara membuat pod baru dengan versi yang ingin di-update sambil tetap mempertahankan pod lama hingga pod yang baru selesai diproses. Sementara Recreate Deployment Strategy akan menghentikan semua pod dengan versi yang lama terlebih dahulu sebelum membuat pod dengan versi yang baru. Pendekatan Recreate Deployment Strategy lebih sederhana tetapi akan menyebabkan terdapatnya suatu waktu dimana tidak ada pod yang berjalan selama masa transisi.
+
+### 4. What do you think are the benefits of using Kubernetes manifest files? Recall your experience in deploying the app manually and compare it to your experience when deploying the same app by applying the manifest files (i.e., invoking `kubectl apply -f` command) to the cluster.
+Salah satu keunggulan dalam menggunakan Kubernetes manifest files yang paling penting adalah kecepatan pembuatan deployment-nya itu sendiri. dengan hanya menjalankan 2 command yakni `kubectl apply -f deployment.yaml` dan `kubectl apply -f service.yaml`, deployment dengan baik sudah dilakukan (jika file .yaml tersebut valid). file-file manifest dari Kubernetes ini juga dapat dengan mudah disimpan, terdokumentasi dengan jelas, dan dapat di-deploy ulang. Selain itu, manifest file memudahkan proses otomatisasi dan reproduksi deployment yang konsisten di berbagai lingkungan, seperti staging dan production. 
